@@ -1,0 +1,54 @@
+@extends('layouts.backend')
+
+@section('content')
+
+<div class="card">
+    <div class="card-body">
+
+        <table id="{{ table_id }}" class="table table-bordered">
+            <thead>
+            <tr>
+
+{{ table_headers }}
+
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+
+@endsection
+
+@section('footer')
+
+<script type="application/javascript">
+document.addEventListener('DOMContentLoaded', function ()
+{
+    new window.DataTable('#{{ table_id }}',
+    {
+        processing: true,
+        serverSide: true,
+
+        ajax:
+        {
+            url: "{{ route('{{ route }}') }}",
+            dataType: "json",
+            type: "POST",
+            data:
+            {
+                _token: "{{ csrf_token() }}"
+            }
+        },
+
+        columns:
+        [
+{{ table_columns }}
+        ],
+
+        order: [[{{ order_column }}, "{{ order_direction }}"]]
+    });
+});
+</script>
+
+@endsection
