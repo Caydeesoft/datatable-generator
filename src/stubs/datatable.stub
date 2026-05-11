@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Http\Datatables;
+
+use App\Models\{{ model }};
+
+
+class {{ class }}
+{
+
+
+    public array $columns = [];
+
+    public function data($request): array
+    {
+        $columns       = $this->columns;
+        $totalData     = {{ model }}::count();
+        $totalFiltered = $totalData;
+
+        $limit = $request->input('length');
+        $start = $request->input('start');
+        $order = $columns[$request->input('order.0.column')];
+        $dir   = $request->input('order.0.dir');
+
+        $query = {{ model }}::query();
+
+        if (!empty($request->input('search.value')))
+        {
+            $search = $request->input('search.value');
+
+            $query->where(function ($q) use ($search)
+            {
+{{ search_conditions }}
+            });
+
+            $totalFiltered = $query->count();
+        }
+
+        $posts = $query
+            ->offset($start)
+            ->limit($limit)
+            ->orderBy($order, $dir)
+            ->get();
+
+        $data = [];
+
+        foreach ($posts as $post)
+        {
+            $nestedData['id'] = $post->id;
+
+            $data[] = $nestedData;
+        }
+
+        return [
+            'draw'            => (int) $request->input('draw'),
+            'recordsTotal'    => $totalData,
+            'recordsFiltered' => $totalFiltered,
+            'data'            => $data,
+        ];
+    }
+}

@@ -1,0 +1,59 @@
+{
+    "name": "caydeesoft/datatable-generator",
+    "description": "A Laravel package for generating server-side DataTables classes",
+    "keywords": [
+        "laravel",
+        "datatable",
+        "generator",
+        "serverside",
+        "datatables"
+    ],
+    "homepage": "https://github.com/caydeesoft/datatable-generator",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dennis Kiptugen",
+            "email": "dennis.kiptoo@caydeesoft.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Caydeesoft\\Datatables\\": "src/"
+        }
+    },
+
+    "autoload-dev": {
+        "psr-4": {
+            "Caydeesoft\\Datatables\\Tests\\": "tests/"
+        }
+    },
+
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Caydeesoft\\Datatables\\Providers\\DataTableGeneratorServiceProvider"
+            ]
+        }
+    },
+
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0",
+        "illuminate/console": "^11.0|^12.0"
+    },
+
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.0",
+        "laravel/pint": "^1.0"
+    },
+
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+
+    "scripts": {
+        "test": "phpunit",
+        "format": "vendor/bin/pint"
+    }
+}
