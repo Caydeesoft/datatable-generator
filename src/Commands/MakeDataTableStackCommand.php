@@ -8,37 +8,27 @@
 	
 	class MakeDataTableStackCommand extends Command
 		{
-		/**
-		 * Command signature.
-		 */
 			protected $signature = '
         make:datatable-stack
         {name : Resource name}
-        {--model= : Model name}
-        {--columns=* : Table columns}
-        {--search=* : Searchable columns}
-        {--table= : Table ID}
-        {--route= : Route prefix}
-        {--controller : Generate controller}
-        {--request : Generate form request}
-        {--policy : Generate policy}
-        {--api : Generate API resource}
+        {--model=}
+        {--columns=*}
+        {--search=*}
+        {--table=}
+        {--route=}
+        {--controller}
+        {--request}
+        {--policy}
+        {--api}
     ';
-		
-		/**
-		 * Command description.
-		 */
+			
 			protected $description = 'Generate full DataTable stack';
-		
-		/**
-		 * Execute command.
-		 */
+			
 			public function handle(): void
 				{
 					$name = Str::studly($this->argument('name'));
 					
-					$model = $this->option('model')
-						?: $name;
+					$model = Str::studly($this->option('model') ?: $name);
 					
 					$table = $this->option('table')
 						?: Str::kebab($name) . '-table';
@@ -46,9 +36,9 @@
 					$route = $this->option('route')
 						?: 'backend.' . Str::snake($name) . '.datatable';
 					
-					$columns = $this->option('columns');
+					$columns = array_values($this->option('columns') ?: []);
 					
-					$search = $this->option('search');
+					$search = array_values($this->option('search') ?: []);
 					
 					$datatable = "{$name}DataTable";
 					
@@ -66,26 +56,22 @@
 					
 					/*
 					|--------------------------------------------------------------------------
-					| Generate DataTable
+					| DataTable
 					|--------------------------------------------------------------------------
 					*/
-					
 					Artisan::call('make:datatable', [
 						'name' => $datatable,
 						'model' => $model,
 						'--search' => $search,
 					]);
 					
-					$this->line(
-						Artisan::output()
-					);
+					$this->line(Artisan::output());
 					
 					/*
 					|--------------------------------------------------------------------------
-					| Generate View
+					| View
 					|--------------------------------------------------------------------------
 					*/
-					
 					Artisan::call('make:datatable-view', [
 						'name' => $view,
 						'--route' => $route,
@@ -93,111 +79,91 @@
 						'--columns' => $columns,
 					]);
 					
-					$this->line(
-						Artisan::output()
-					);
+					$this->line(Artisan::output());
 					
 					/*
 					|--------------------------------------------------------------------------
-					| Generate Controller
+					| Controller
 					|--------------------------------------------------------------------------
 					*/
-					
-					if ($this->option('controller'))
-						{
-							Artisan::call('make:controller', [
-								'name' => $controller,
-							]);
-							
-							$this->line(
-								Artisan::output()
-							);
-						}
+					if ($this->option('controller')) {
+						Artisan::call('make:controller', [
+							'name' => $controller,
+						]);
+						
+						$this->line(Artisan::output());
+					}
 					
 					/*
 					|--------------------------------------------------------------------------
-					| Generate Request
+					| Request
 					|--------------------------------------------------------------------------
 					*/
-					
-					if ($this->option('request'))
-						{
-							Artisan::call('make:request', [
-								'name' => $request,
-							]);
-							
-							$this->line(
-								Artisan::output()
-							);
-						}
+					if ($this->option('request')) {
+						Artisan::call('make:request', [
+							'name' => $request,
+						]);
+						
+						$this->line(Artisan::output());
+					}
 					
 					/*
 					|--------------------------------------------------------------------------
-					| Generate Policy
+					| Policy
 					|--------------------------------------------------------------------------
 					*/
-					
-					if ($this->option('policy'))
-						{
-							Artisan::call('make:policy', [
-								'name' => $policy,
-								'--model' => $model,
-							]);
-							
-							$this->line(
-								Artisan::output()
-							);
-						}
+					if ($this->option('policy')) {
+						Artisan::call('make:policy', [
+							'name' => $policy,
+							'--model' => $model,
+						]);
+						
+						$this->line(Artisan::output());
+					}
 					
 					/*
 					|--------------------------------------------------------------------------
-					| Generate API Resource
+					| API Resource
 					|--------------------------------------------------------------------------
 					*/
-					
-					if ($this->option('api'))
-						{
-							Artisan::call('make:resource', [
-								'name' => $resource,
-							]);
-							
-							$this->line(
-								Artisan::output()
-							);
-						}
+					if ($this->option('api')) {
+						Artisan::call('make:resource', [
+							'name' => $resource,
+						]);
+						
+						$this->line(Artisan::output());
+					}
 					
 					/*
 					|--------------------------------------------------------------------------
-					| Success Message
+					| Summary Table (FIXED)
 					|--------------------------------------------------------------------------
 					*/
+					$rows = [
+						['DataTable', "app/Http/Datatables/{$datatable}.php"],
+						['View', "resources/views/{$view}.blade.php"],
+					];
+					
+					if ($this->option('controller')) {
+						$rows[] = ['Controller', "app/Http/Controllers/{$controller}.php"];
+					}
+					
+					if ($this->option('request')) {
+						$rows[] = ['Request', "app/Http/Requests/{$request}.php"];
+					}
+					
+					if ($this->option('policy')) {
+						$rows[] = ['Policy', "app/Policies/{$policy}.php"];
+					}
+					
+					if ($this->option('api')) {
+						$rows[] = ['API Resource', "app/Http/Resources/{$resource}.php"];
+					}
 					
 					$this->newLine();
 					
 					$this->components->info('DataTable stack generated successfully.');
 					
-					$this->table(
-						['Component', 'Generated'],
-						[
-							['DataTable', "app/Http/Datatables/{$datatable}.php"],
-							['View', "resources/views/{$view}.blade.php"],
-							
-							$this->option('controller')
-								? ['Controller', "app/Http/Controllers/{$controller}.php"]
-								: null,
-							
-							$this->option('request')
-								? ['Request', "app/Http/Requests/{$request}.php"]
-								: null,
-							
-							$this->option('policy')
-								? ['Policy', "app/Policies/{$policy}.php"]
-								: null,
-							
-							$this->option('api')
-								? ['API Resource', "app/Http/Resources/{$resource}.php"]
-								: null,
-						]
-					);
+					$this->table(['Component', 'Generated'], $rows);
 				}
 		}

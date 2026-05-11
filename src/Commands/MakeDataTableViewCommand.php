@@ -2,63 +2,47 @@
 	
 	namespace Caydeesoft\Datatables\Commands;
 	
-	use Illuminate\Console\GeneratorCommand;
+	use Illuminate\Console\Command;
+	use Illuminate\Support\Facades\File;
 	use Illuminate\Support\Str;
 	use Symfony\Component\Console\Input\InputOption;
 	
-	class MakeDataTableViewCommand extends GeneratorCommand
+	class MakeDataTableViewCommand extends Command
 		{
-		/**
-		 * Console command name.
-		 */
-			protected $name = 'make:datatable-view';
-		
-		/**
-		 * Description.
-		 */
+			protected $signature = 'make:datatable-view
+        {name}
+        {--columns=*}
+        {--route=}
+        {--table=datatable}';
+			
 			protected $description = 'Generate a DataTable Blade view';
-		
-		/**
-		 * Generator type.
-		 */
-			protected $type = 'DataTable View';
-		
-		/**
-		 * Stub location.
-		 */
-			protected function getStub(): string
+			
+			public function handle(): void
 				{
-					return file_exists(base_path('stubs/datatable-view.stub'))
-						? base_path('stubs/datatable-view.stub')
-						: __DIR__ . '/../../stubs/datatable-view.stub';
-				}
-		
-		/**
-		 * Build class content.
-		 */
-			protected function buildClass($name): string
-				{
-					$stub = parent::buildClass($name);
+					$name = $this->argument('name');
 					
 					$columns = $this->option('columns');
-					
 					$route = $this->option('route');
-					
 					$tableId = $this->option('table');
 					
+					$path = resource_path("views/{$name}.blade.php");
+					
+					if (File::exists($path)) {
+						$this->error("View already exists.");
+						return;
+					}
+					
+					$stub = File::get(base_path('stubs/datatable-view.stub'));
+					
 					$headers = collect($columns)
-						->map(fn ($column) =>
-							'<th>' . Str::headline($column) . '</th>'
-						)
+						->map(fn ($column) => '<th>' . Str::headline($column) . '</th>')
 						->implode("\n                ");
 					
 					$jsColumns = collect($columns)
-						->map(fn ($column) =>
-							'{"data": "' . $column . '"}'
-						)
+						->map(fn ($column) => '{"data": "' . $column . '"}')
 						->implode(",\n                    ");
 					
-					return str_replace(
+					$stub = str_replace(
 						[
 							'{{ table_id }}',
 							'{{ route }}',
@@ -77,56 +61,10 @@
 						],
 						$stub
 					);
-				}
-		
-		/**
-		 * Get destination path.
-		 */
-			protected function getPath($name): string
-				{
-					return resource_path(
-						'views/' .
-						str_replace('\\', '/', $name) .
-						'.blade.php'
-					);
-				}
-		
-		/**
-		 * Disable namespace replacement.
-		 */
-			protected function getDefaultNamespace($rootNamespace): string
-				{
-					return '';
-				}
-		
-		/**
-		 * Command options.
-		 */
-			protected function getOptions(): array
-				{
-					return [
-						[
-							'columns',
-							null,
-							InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-							'Table columns',
-							[],
-						],
-						
-						[
-							'route',
-							null,
-							InputOption::VALUE_REQUIRED,
-							'Datatable route',
-						],
-						
-						[
-							'table',
-							null,
-							InputOption::VALUE_OPTIONAL,
-							'Table ID',
-							'datatable',
-						],
-					];
+					
+					File::ensureDirectoryExists(dirname($path));
+					File::put($path, $stub);
+					
+					$this->info("View created successfully.");
 				}
 		}
