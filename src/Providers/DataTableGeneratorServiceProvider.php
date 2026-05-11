@@ -1,66 +1,38 @@
 <?php
+	
 	namespace Caydeesoft\Datatables\Providers;
 	
-	use Caydeesoft\Datatables\Commands\MakeDataTableStackCommand;
-	use Caydeesoft\Datatables\Commands\MakeDataTableViewCommand;
 	use Illuminate\Support\ServiceProvider;
-	
 	use Caydeesoft\Datatables\Commands\MakeDataTableCommand;
+	use Caydeesoft\Datatables\Commands\MakeDataTableViewCommand;
+	use Caydeesoft\Datatables\Commands\MakeDataTableStackCommand;
+	
 	class DataTableGeneratorServiceProvider extends ServiceProvider
 		{
 			public function register(): void
-				
 				{
-					
 					$this->commands([
-						                
 						                MakeDataTableCommand::class,
-						                
 						                MakeDataTableViewCommand::class,
-						                
 						                MakeDataTableStackCommand::class,
-					                
 					                ]);
-					
 				}
-		
-		
-		
-		/**
-		 
-		 * Bootstrap services.
-		 
-		 */
 			
 			public function boot(): void
-				
 				{
-					
 					$this->registerPublishes();
-					
 				}
-		
-		/**
-		 
-		 * Handle publishable resources.
-		 
-		 */
 			
 			protected function registerPublishes(): void
-				
 				{
+					$base = dirname(__DIR__, 2); // <- package root
 					
 					$this->publishes([
-						                 
-						                 __DIR__ . '/../../stubs/datatable.stub' =>
-							                 
+						                 $base . '/stubs/datatable.stub' =>
 							                 base_path('stubs/datatable.stub'),
 						                 
-						                 __DIR__ . '/../../stubs/datatable-view.stub' =>
-							                 
+						                 $base . '/stubs/datatable-view.stub' =>
 							                 base_path('stubs/datatable-view.stub'),
-					                 
 					                 ], 'datatable-stubs');
-					
 				}
 		}
